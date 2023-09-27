@@ -93,15 +93,15 @@ class ETL:
         self.source_type = source_type
         self.data_type = data_type
         if not start_date:
-            self.start_date = context['execution_date'].replace(day=1)
+            self.start_date = context['execution_date'].date().replace(day=1)
         else:
             self.start_date = start_date
         if not end_date:
             if end_date_EXCLUSIVE:
-                self.end_date = (context['execution_date'].replace(day=28) \
+                self.end_date = (context['execution_date'].date().replace(day=28) \
                                  + dt.timedelta(days=4)).replace(day=1)
             else:
-                self.end_date = (context['execution_date'].replace(day=28) \
+                self.end_date = (context['execution_date'].date().replace(day=28) \
                                  + dt.timedelta(days=4)).replace(day=1) \
                                     - dt.timedelta(days=1)
         else:
@@ -325,128 +325,4 @@ class ETL:
 
         print('Загружено', initial_rows_number, 'строк.')
 
-
-if __name__ == '__main__':
-    #ИСК
-    # i = ETL(
-    #     dwh_host='vs-dwh-gpm1.st.tech',
-    #     dwh_port='5432',
-    #     dwh_database='prod_dwh',
-    #     dwh_user='shveynikovab',
-    #     dwh_password='fk2QVnJH8i',
-    #     dwh_scheme='test',
-    #     source_host='cl04sql.st.tech\inst04sql',
-    #     source_database='rm_work',
-    #     source_port='5432', 
-    #     source_user='PowerBI_integration',
-    #     source_password='VoGZX8ORSE',
-    #     # sql_transform = 1
-    # )
-
-
-    # i.etl_start(
-    #     source_type='sql',
-    #     data_type='isc_orders',
-    #     start_date='2023-09-01',
-    #     end_date='2023-10-01',
-    #     end_date_EXCLUSIVE=True,
-    # )
-
-    # mdaudit
-    # i = ETL(
-    #     dwh_host='vs-dwh-gpm1.st.tech',
-    #     dwh_port='5432',
-    #     dwh_database='prod_dwh',
-    #     dwh_user='shveynikovab',
-    #     dwh_password='fk2QVnJH8i',
-    #     dwh_scheme='test',
-    #     rest_api_endpoint='https://api.qvalon.com/v1/connector/rpc/stt_checklists',
-    #     rest_api_method='get',
-    #     rest_api_auth=None,
-    #     # rest_api_params_dict={
-    #     #             'last_modified_at': 'gt.{start_date}'
-    #     #         },
-    #     rest_api_params_str='?last_modified_at=gte.{start_date}&last_modified_at=lt.{end_date}',
-    #     rest_api_headers={"Authorization": "Bearer SQ8aFRy6U06OLiE3eOhptdjU31sy3CaQ"},
-    #     rest_api_data=None,
-    #     rest_api_json_transform={
-    #         'record_path': 'answers',
-    #         'meta': ['id', 'shop_id'],
-    #         'meta_prefix': "check_",
-    #     }  
-    # )
-
-
-    # i.etl_start(
-    #     source_type='rest_api',
-    #     data_type='mdaudit_questions_v2',
-    #     start_date='2023-09-01',
-    #     end_date='2023-10-01',
-    #     end_date_EXCLUSIVE=True,
-    # )
-
-
-
-    # cb
-
-    get_stavka = """<?xml version="1.0" encoding="utf-8"?>
-                <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-                <soap:Body>
-                    <KeyRateXML xmlns="http://web.cbr.ru/">
-                    <fromDate>{start_date}</fromDate>
-                    <ToDate>{end_date}</ToDate>
-                    </KeyRateXML>
-                </soap:Body>
-                </soap:Envelope>"""
-
-    i = ETL(
-        dwh_host='vs-dwh-gpm1.st.tech',
-        dwh_port='5432',
-        dwh_database='prod_dwh',
-        dwh_user='shveynikovab',
-        dwh_password='fk2QVnJH8i',
-        dwh_scheme='test',
-        rest_api_endpoint='https://cbr.ru/DailyInfoWebServ/DailyInfo.asmx',
-        rest_api_method='post',
-        rest_api_auth=None,
-        rest_api_params_str=None,
-        rest_api_headers={'content-type': 'text/xml'},
-        rest_api_data=get_stavka,
-        rest_api_xml_transform={
-            'xpath': "//KR",     
-        }     
-
-    )
-
-
-    i.etl_start(
-        source_type='rest_api',
-        data_type='cb_stavka',
-        start_date='2023-09-01',
-        end_date='2023-09-30',
-        end_date_EXCLUSIVE=True,
-    )
-
-
-    # i.etl_start(
-    #     # Общие настройки
-    #     source_type='rest_api',
-    #     data_type='cb_stavka_v2',
-    #     start_date='2023-09-01',
-    #     end_date='2023-09-30',
-    #     end_date_EXCLUSIVE=True,
-    #     # Параметры REST API
-    #     rest_api_endpoint='https://cbr.ru/DailyInfoWebServ/DailyInfo.asmx',
-    #     rest_api_method='post',
-    #     rest_api_auth=None,
-    #     # rest_api_params_dict={
-    #     #             'last_modified_at': 'gt.{start_date}'
-    #     #         },
-    #     rest_api_params_str=None,
-    #     rest_api_headers={'content-type': 'text/xml'},
-    #     rest_api_data=get_stavka,
-    #     # rest_api_xml_transform={
-    #     #     'xpath': "//KR",     
-    #     # }     
-    # )
 
