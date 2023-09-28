@@ -310,15 +310,23 @@ class ETL:
             insert_stmt = f"INSERT INTO {self.__dwh_scheme}.{self.data_type} VALUES ({placeholders})"
             cursor.execute(insert_stmt, self.data[0])
 
-        cursor.execute(
-            f"""
-            SELECT COUNT(*)
-            FROM {self.__dwh_scheme}.{self.data_type}
-            WHERE period >= '{self.start_date}'
-                AND period < '{self.end_date}';
-            """
-        )
-
+        if self.periodic_data:
+            cursor.execute(
+                f"""
+                SELECT COUNT(*)
+                FROM {self.__dwh_scheme}.{self.data_type}
+                WHERE period >= '{self.start_date}'
+                    AND period < '{self.end_date}';
+                """
+            )
+        else:
+            cursor.execute(
+                f"""
+                SELECT COUNT(*)
+                FROM {self.__dwh_scheme}.{self.data_type};
+                """
+            )
+        
         total_rows_number = cursor.fetchone()[0]
 
         if total_rows_number != initial_rows_number:
