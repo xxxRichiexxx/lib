@@ -277,15 +277,6 @@ class ETL:
             new_item.append(dt.datetime.now())
             result.append(tuple(new_item))
         self.data = result
-        if len(self.data) > 1:
-            print(self.data[:10])
-        else:
-            print(
-                self.data[0][0][:10]+'...]',
-                ',',
-                self.data[0][1],
-                ',',
-                self.data[0][2])
 
     def load(self):
         """Загрузка данных в хранилище."""
