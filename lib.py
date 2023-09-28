@@ -84,6 +84,7 @@ class ETL:
         self,
         # Общие настройки
         data_type=None,
+        periodic_data=True,
         start_date=None,
         end_date=None,
         end_date_EXCLUSIVE=True,
@@ -95,6 +96,7 @@ class ETL:
         """Запуск процесса ETL."""
 
         self.data_type = data_type
+        self.periodic_data = periodic_data
 
         if start_date and end_date:
             self.start_date = start_date
@@ -270,11 +272,10 @@ class ETL:
         result = []
         for item in self.data:
             new_item = list(item)
-            new_item.append(self.start_date)
+            if self.periodic_data:
+                new_item.append(self.start_date)
             new_item.append(dt.datetime.now())
-            result.append(
-                tuple(new_item)
-            )
+            result.append(tuple(new_item))
         self.data = result
         if len(self.data) > 1:
             print(self.data[:10])
@@ -285,7 +286,6 @@ class ETL:
                 self.data[0][1],
                 ',',
                 self.data[0][2])
-    
 
     def load(self):
         """Загрузка данных в хранилище."""
@@ -296,13 +296,20 @@ class ETL:
 
         cursor = self.__conn.cursor()
 
-        cursor.execute(
-            f"""
-            DELETE FROM {self.__dwh_scheme}.{self.data_type}
-            WHERE period >= '{self.start_date}'
-                AND period < '{self.end_date}';
-            """
-        )
+        if self.periodic_data:
+            cursor.execute(
+                f"""
+                DELETE FROM {self.__dwh_scheme}.{self.data_type}
+                WHERE period >= '{self.start_date}'
+                    AND period < '{self.end_date}';
+                """
+            )
+        else:
+            cursor.execute(
+                f"""
+                DELETE FROM {self.__dwh_scheme}.{self.data_type};
+                """
+            )
 
         if initial_rows_number > 1:
             insert_stmt = f"INSERT INTO {self.__dwh_scheme}.{self.data_type} VALUES %s"
