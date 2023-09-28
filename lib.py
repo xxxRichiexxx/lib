@@ -13,13 +13,15 @@ class ETL:
 
     def __init__(
         self,
-        # Параметры хранилища
+        # Параметры хранилища. Передаются обязательно:
         dwh_host,
         dwh_database,
         dwh_user,
         dwh_password,
         dwh_scheme,
         dwh_port='5432',
+        # Тип источника данных. Передается обязательно:
+        source_type=None,
         # Параметры REST API.
         # Если в параметрах запроса или теле запроса должна передаваться дата,
         # то необходимо параметризировать данные строки,
@@ -58,6 +60,8 @@ class ETL:
             password=dwh_password,
         )
         self.__dwh_scheme = dwh_scheme
+        # Сохранение типа источника
+        self.source_type = source_type
         # Сохранение параметров REST API
         self.rest_api_endpoint = rest_api_endpoint
         self.rest_api_method = rest_api_method
@@ -79,33 +83,39 @@ class ETL:
     def etl_start(
         self,
         # Общие настройки
-        source_type=None,
         data_type=None,
         start_date=None,
         end_date=None,
         end_date_EXCLUSIVE=True,
+        month_offset=0,
         # Параметры трансформации,
         column_names=None,
         **context,
     ):
         """Запуск процесса ETL."""
-        # Сохранение общих настроек
-        self.source_type = source_type
+
         self.data_type = data_type
-        if not start_date:
-            self.start_date = context['execution_date'].date().replace(day=1)
-        else:
+
+        if start_date and end_date:
             self.start_date = start_date
-        if not end_date:
-            if end_date_EXCLUSIVE:
-                self.end_date = (context['execution_date'].date().replace(day=28) \
-                                 + dt.timedelta(days=4)).replace(day=1)
-            else:
-                self.end_date = (context['execution_date'].date().replace(day=28) \
-                                 + dt.timedelta(days=4)).replace(day=1) \
-                                    - dt.timedelta(days=1)
-        else:
             self.end_date = end_date
+        else:
+            month = context['execution_date'].month - month_offset
+            if month <= 0:
+                month = 12 + month
+                execution_date = context['execution_date'].date().replace(month = month, year = context['execution_date'].year - 1, day=1)
+            else:
+                execution_date = context['execution_date'].date().replace(month = month, day=1)
+        
+            self.start_date = execution_date
+
+            if end_date_EXCLUSIVE:
+                self.end_date = (execution_date.replace(day=28) + dt.timedelta(days=4)) \
+                    .replace(day=1)
+            else:
+                self.end_date = (execution_date.replace(day=28) + dt.timedelta(days=4)) \
+                    .replace(day=1) - dt.timedelta(days=1)
+            
         # Параметры трансформации,
         self.column_names = column_names
 
