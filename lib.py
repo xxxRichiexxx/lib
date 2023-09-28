@@ -306,8 +306,9 @@ class ETL:
             insert_stmt = f"INSERT INTO {self.__dwh_scheme}.{self.data_type} VALUES %s"
             psycopg2.extras.execute_values(cursor, insert_stmt, self.data)
         else:
-            insert_stmt = f"INSERT INTO {self.__dwh_scheme}.{self.data_type} VALUES (%s, %s, %s)"
-            cursor.execute(insert_stmt, (self.data[0][0], self.data[0][1], self.data[0][2],))
+            placeholders = ', '.join(['%s'] * len(self.data[0]))
+            insert_stmt = f"INSERT INTO {self.__dwh_scheme}.{self.data_type} VALUES ({placeholders})"
+            cursor.execute(insert_stmt, self.data[0])
 
         cursor.execute(
             f"""
