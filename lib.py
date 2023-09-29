@@ -28,6 +28,16 @@ class ETL:
         # чтобы в методе etl_start() произошла подстановка значений даты
         # (которые переданы явно или взяты из контекста).
         # Пример: rest_api_params_str='?last_modified_at=gte.{start_date}&last_modified_at=lt.{end_date}'
+        # Если необходимо нормализовать json, то укажите параметры rest_api_json_normalize, например:
+        # rest_api_json_normalize={
+        #         'record_path': 'answers',
+        #         'meta': ['id', 'shop_id'],
+        #         'meta_prefix': "check_",
+        #     }
+        # Если необходимо нормализовать xml, то укажите следующие параметры(пимер):
+        # rest_api_xml_transform={
+        #    'xpath': "//KR",     
+        #}      
         rest_api_endpoint=None,
         rest_api_method=None,
         rest_api_auth=None,
@@ -35,8 +45,8 @@ class ETL:
         rest_api_params_str=None,
         rest_api_headers=None,
         rest_api_data=None,
-        rest_api_json_transform=None,
-        rest_api_xml_transform=None,
+        rest_api_json_normalize=None,
+        rest_api_xml_normalize=None,
         # Параметры SQL СУБД
         # Для работы с SQL-источниками, необходимо рядом с файлоь py разместить файл sql-запроса, например:
         # EXECUTE dbo.хп_ДляДашбордов_ЗаявкиДилера '{start_date}'
@@ -45,7 +55,8 @@ class ETL:
         source_port='5432',
         source_user=None,
         source_password=None,
-        sql_transform=None,
+        sql_script_path=os.path.dirname(os.path.abspath(__file__)),
+        sql_normalize=True,
     ):
         """
         В конструктор всегда необходимо подавать параметры хранилища данных.
@@ -70,15 +81,16 @@ class ETL:
         self.rest_api_params_str = rest_api_params_str
         self.rest_api_headers = rest_api_headers
         self.rest_api_data = rest_api_data
-        self.rest_api_json_transform = rest_api_json_transform
-        self.rest_api_xml_transform = rest_api_xml_transform
+        self.rest_api_json_normalize = rest_api_json_normalize
+        self.rest_api_xml_normalize = rest_api_xml_normalize
         # Сохранение параметров SQL СУБД
         self.source_host = source_host
         self.source_database = source_database
         self.source_port = source_port
         self.source_user = source_user
         self.source_password = source_password
-        self.sql_transform = sql_transform
+        self.sql_script_path = sql_script_path
+        self.sql_normalize = sql_normalize
 
     def etl_start(
         self,
@@ -193,8 +205,8 @@ class ETL:
         # Раскомментировать строку ниже, если проблемы с кодировкой
         # response.encoding = 'utf-8-sig'
 
-        if self.rest_api_json_transform:
-            json_key = self.rest_api_json_transform.get('json_key', None)
+        if self.rest_api_json_normalize:
+            json_key = self.rest_api_json_normalize.get('json_key', None)
             if json_key:
                 self.data = response.json()[json_key]
             else:
@@ -202,14 +214,14 @@ class ETL:
 
             self.data = pd.json_normalize(
                 self.data,
-                self.rest_api_json_transform.get('record_path', None),
-                self.rest_api_json_transform.get('meta', None),
-                self.rest_api_json_transform.get('meta_prefix', None),
+                self.rest_api_json_normalize.get('record_path', None),
+                self.rest_api_json_normalize.get('meta', None),
+                self.rest_api_json_normalize.get('meta_prefix', None),
             ).values           
-        elif self.rest_api_xml_transform:
+        elif self.rest_api_xml_normalize:
             self.data = pd.read_xml(
                 response.text,
-                xpath=self.rest_api_xml_transform.get('xpath', None)
+                xpath=self.rest_api_xml_normalize.get('xpath', None)
             ).values
         else:
             self.data = [(response.text,)]
@@ -219,13 +231,12 @@ class ETL:
         
         print('Извлечение данных из SQL СУБД.')
 
-        path = os.path.dirname(os.path.abspath(__file__))
-        print('Путь до sql-скрипта:', path)
+        print('Путь до sql-скрипта:', self.sql_script_path)
 
         with open(
-            path+f'/stage_{self.data_type}.sql',
+            os.path.join(self.sql_script_path, f'{self.data_type}.sql'),
             'r',
-            encoding="utf-8"
+            encoding="utf-8",
         ) as f:
             query = f.read().format(
                 start_date=self.start_date,
@@ -238,7 +249,7 @@ class ETL:
         else:
             driver = 'ODBC Driver 18 for SQL Server'
 
-        if self.sql_transform:
+        if not self.sql_normalize:
 
             eng_str = (fr'mssql://{self.source_user}:{quote(self.source_password)}'
                        fr'@{self.source_host}/{self.source_database}?driver={driver}')
@@ -247,10 +258,13 @@ class ETL:
 
             source_engine = sa.create_engine(eng_str)
 
-            self.data = pd.read_sql_query(
+            json_data = pd.read_sql_query(
                 query,
                 source_engine,
-            ).values
+            ).to_json(orient="records").encode('utf-8').decode('unicode-escape')
+
+            self.data = [(json_data,)]
+            
         else:
             con = pyodbc.connect(
                 'DRIVER={'+driver+'};SERVER='+self.source_host \
