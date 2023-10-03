@@ -272,9 +272,10 @@ class ETL:
                 + ';ENCRYPT=no;UID='+self.source_user \
                 + ';PWD=' + self.source_password
             )
-            cursor = con.cursor()
-            cursor.execute(query)
-            self.data = cursor.fetchall()
+            with con:
+                with con.cursor() as cursor:
+                    cursor.execute(query)
+                    self.data = cursor.fetchall()
 
         print(self.data[:10])
 
@@ -299,61 +300,58 @@ class ETL:
 
         initial_rows_number = len(self.data)
 
-        cursor = self.__conn.cursor()
+        with self.__conn:
+            with self.__conn.cursor() as cursor:
 
-        if self.periodic_data:
-            cursor.execute(
-                f"""
-                DELETE FROM {self.__dwh_scheme}.{self.data_type}
-                WHERE period >= '{self.start_date}'
-                    AND period < '{self.end_date}';
-                """
-            )
-        else:
-            cursor.execute(
-                f"""
-                DELETE FROM {self.__dwh_scheme}.{self.data_type};
-                """
-            )
+                if self.periodic_data:
+                    cursor.execute(
+                        f"""
+                        DELETE FROM {self.__dwh_scheme}.{self.data_type}
+                        WHERE period >= '{self.start_date}'
+                            AND period < '{self.end_date}';
+                        """
+                    )
+                else:
+                    cursor.execute(
+                        f"""
+                        DELETE FROM {self.__dwh_scheme}.{self.data_type};
+                        """
+                    )
 
-        if initial_rows_number > 1:
-            insert_stmt = f"INSERT INTO {self.__dwh_scheme}.{self.data_type} VALUES %s"
-            psycopg2.extras.execute_values(cursor, insert_stmt, self.data)
-        else:
-            placeholders = ', '.join(['%s'] * len(self.data[0]))
-            insert_stmt = f"INSERT INTO {self.__dwh_scheme}.{self.data_type} VALUES ({placeholders})"
-            cursor.execute(insert_stmt, self.data[0])
+                if initial_rows_number > 1:
+                    insert_stmt = f"INSERT INTO {self.__dwh_scheme}.{self.data_type} VALUES %s"
+                    psycopg2.extras.execute_values(cursor, insert_stmt, self.data)
+                else:
+                    placeholders = ', '.join(['%s'] * len(self.data[0]))
+                    insert_stmt = f"INSERT INTO {self.__dwh_scheme}.{self.data_type} VALUES ({placeholders})"
+                    cursor.execute(insert_stmt, self.data[0])
 
-        if self.periodic_data:
-            cursor.execute(
-                f"""
-                SELECT COUNT(*)
-                FROM {self.__dwh_scheme}.{self.data_type}
-                WHERE period >= '{self.start_date}'
-                    AND period < '{self.end_date}';
-                """
-            )
-        else:
-            cursor.execute(
-                f"""
-                SELECT COUNT(*)
-                FROM {self.__dwh_scheme}.{self.data_type};
-                """
-            )
-        
-        total_rows_number = cursor.fetchone()[0]
+                if self.periodic_data:
+                    cursor.execute(
+                        f"""
+                        SELECT COUNT(*)
+                        FROM {self.__dwh_scheme}.{self.data_type}
+                        WHERE period >= '{self.start_date}'
+                            AND period < '{self.end_date}';
+                        """
+                    )
+                else:
+                    cursor.execute(
+                        f"""
+                        SELECT COUNT(*)
+                        FROM {self.__dwh_scheme}.{self.data_type};
+                        """
+                    )
+                
+                total_rows_number = cursor.fetchone()[0]
 
-        if total_rows_number != initial_rows_number:
-            raise Exception(
-                'Загруженное число строк не совпадает с полученным:',
-                total_rows_number,
-                initial_rows_number,
-            )
-
-        self.__conn.commit()
-        cursor.close()
-        self.__conn.close()
-
-        print('Загружено', initial_rows_number, 'строк.')
+                if total_rows_number != initial_rows_number:
+                    raise Exception(
+                        'Загруженное число строк не совпадает с полученным:',
+                        total_rows_number,
+                        initial_rows_number,
+                    )
+                else:
+                    print('Загружено', initial_rows_number, 'строк.')
 
 
