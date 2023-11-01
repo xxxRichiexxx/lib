@@ -89,6 +89,7 @@ class CRMExtractor:
         element = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="request-grid"]/div[1]/div[1]/button/i')))
         element.click()
 
+        print('Добавляю поля в выгрузку')
         # Добавление полей в выгрузку
         for _ in range(1,11):
             try:
@@ -106,6 +107,7 @@ class CRMExtractor:
         print('Выбираем ВСЕ ОБРАЩЕНИЕ(АРХИВ)')
         menu_item = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="archive"]/a')))
         menu_item.click()
+        time.sleep(10)
 
         #Настройка отчета
         print('Разворачиваю настройки отчета')
