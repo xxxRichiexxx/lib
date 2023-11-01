@@ -102,13 +102,18 @@ class CRMExtractor:
         ok_button = self.driver.find_element(By.XPATH, '//*[@id="modal_customizable"]/div/div/div[3]/button')
         ok_button.click()
 
+        # Выбираем ВСЕ ОБРАЩЕНИЕ(АРХИВ)
+        print('Выбираем ВСЕ ОБРАЩЕНИЕ(АРХИВ)')
+        menu_item = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="archive"]/a')))
+        menu_item.click()
+
         #Настройка отчета
         print('Разворачиваю настройки отчета')
         menu_item = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="grand_selector"]/div[1]/div/table[2]/tbody/tr/td[3]/a')))
         menu_item.click()
 
         print('Выставляю тип выгрузки за месяц')
-        menu_item = self.driver.find_element(By.XPATH, '//*[@id="interval_type"]')
+        menu_item = wait.until(EC.element_to_be_clickable((By.XPATH,  '//*[@id="interval_type"]')))
         # Выбор элемента из выпадающего списка
         select = Select(menu_item)
         select.select_by_visible_text("МС")
