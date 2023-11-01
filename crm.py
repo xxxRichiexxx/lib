@@ -37,7 +37,7 @@ class CRMExtractor:
         self.chrome_options.add_argument('--verbose')                            # Уровень журнала. --verbose эквивалентно --log-level=ALL и --silent эквивалентно --log-level=OFF
         self.chrome_options.add_argument("--disable-extensions")                 # позволяет отключить все расширения браузера при запуске
         self.chrome_options.add_argument("--start-maximized")                    # Запуск с развернутым на весь экран окном
-        # self.chrome_options.add_argument('--headless')                           # Headless Browser - это веб-браузер без графического пользовательского интерфейса (GUI)
+        self.chrome_options.add_argument('--headless')                           # Headless Browser - это веб-браузер без графического пользовательского интерфейса (GUI)
         self.chrome_options.add_argument('--disable-gpu')                        
         self.chrome_options.add_argument('--disable-dev-shm-usage')
         self.chrome_options.add_argument('--no-sandbox')
