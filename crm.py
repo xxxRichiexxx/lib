@@ -85,7 +85,7 @@ class CRMExtractor:
         menu_item.click()
 
         # Ожидание загрузки страницы и появления элемента шестеренки
-        wait = WebDriverWait(self.driver, 5)
+        wait = WebDriverWait(self.driver, 10)
         element = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="request-grid"]/div[1]/div[1]/button/i')))
         element.click()
 
