@@ -70,7 +70,7 @@ class CRMExtractor:
         confirm_button = self.driver.find_element(By.NAME, 'login')
         confirm_button.click()
 
-    def get_requests(self, requests_type='ГАЗ'):
+    def get_requests(self, division=None):
         self.auth()
         # Ожидание загрузки страницы и появления элемента
         wait = WebDriverWait(self.driver, 20)
@@ -140,7 +140,7 @@ class CRMExtractor:
         menu_item.click()
 
         # Если выгружаем заявки по BUS, то необходимо выбрать производителя
-        if requests_type != 'ГАЗ':
+        if division:
             try:
                 menu_item = wait.until(
                     EC.element_to_be_clickable((
@@ -150,7 +150,7 @@ class CRMExtractor:
                 )
                 # Выбор элемента из выпадающего списка
                 select = Select(menu_item)
-                select.select_by_visible_text(requests_type)
+                select.select_by_visible_text(division)
             except:
                 raise Exception(
                     'Элемент для выбора производителя не найден. Возможно, данный элемент недоступен для данного аккаунта.'
