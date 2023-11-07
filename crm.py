@@ -141,15 +141,20 @@ class CRMExtractor:
 
         # Если выгружаем заявки по BUS, то необходимо выбрать производителя
         if requests_type != 'ГАЗ':
-            menu_item = wait.until(
-                EC.element_to_be_clickable((
-                    By.XPATH,
-                    '//*[@id="interval_type"]'          ### Исправить
-                ))
-            )
-            # Выбор элемента из выпадающего списка
-            select = Select(menu_item)
-            select.select_by_visible_text(requests_type)           
+            try:
+                menu_item = wait.until(
+                    EC.element_to_be_clickable((
+                        By.XPATH,
+                        '//*[@id="interval_type"]'          ### Исправить
+                    ))
+                )
+                # Выбор элемента из выпадающего списка
+                select = Select(menu_item)
+                select.select_by_visible_text(requests_type)
+            except:
+                raise Exception(
+                    'Элемент для выбора производителя не найден. Возможно, данный элемент недоступен для данного аккаунта.'
+                )           
 
         print('Выставляю тип выгрузки за месяц')
         menu_item = wait.until(
