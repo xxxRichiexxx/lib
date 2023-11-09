@@ -220,6 +220,156 @@ class CRMExtractor:
 
         self.file_check('Obracsheniya')
 
+def get_worklists(self, division=None):
+        self.auth()
+        # Ожидание загрузки страницы и появления элемента
+        wait = WebDriverWait(self.driver, 20)
+        menu_item = wait.until(
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Процесс продаж'))
+        )
+        # Выбор нужного отчета
+        print('Выбираю в меню нужный отчет (ОБРАЩЕНИЯ)')
+        actions = ActionChains(self.driver)
+        # Перемещение курсора к указанному элементу
+        actions.move_to_element(menu_item).perform()
+        menu_item = self.driver.find_element(By.LINK_TEXT, 'Рабочие листы')
+        print("Адрес ссылки:", menu_item.get_attribute("href"))
+        menu_item.click()
+
+        # Ожидание загрузки страницы и появления элемента шестеренки
+        wait = WebDriverWait(self.driver, 10)
+        element = wait.until(
+            EC.element_to_be_clickable((
+                By.XPATH,
+                '//*[@id="worklists-grid"]/div[1]/div[1]/button'
+            ))
+        )
+        element.click()
+
+        print('Добавляю поля в выгрузку')
+        # Добавление полей в выгрузку
+        for _ in range(1,4):
+            try:
+                field_item = wait.until(
+                    EC.element_to_be_clickable((
+                        By.XPATH,
+                        f'//*[@id="modal_customizable"]/div/div/div[2]/div/form/fieldset/div/div[1]/select/option[1]'
+                    ))
+                )
+                field_item.click()
+                button = self.driver.find_element(
+                    By.XPATH,
+                    '//*[@id="modal_customizable"]/div/div/div[2]/div/form/fieldset/div/div[2]/a[1]'
+                )
+                button.click()
+            except:
+                break       
+        
+        ok_button = self.driver.find_element(
+            By.XPATH,
+            '//*[@id="modal_customizable"]/div/div/div[3]/button'
+        )
+        ok_button.click()
+
+        # Выбираем ВСЕ ОБРАЩЕНИЕ(АРХИВ)
+        # print('Выбираем ВСЕ ОБРАЩЕНИЕ(АРХИВ)')
+        # menu_item = wait.until(
+        #     EC.element_to_be_clickable((By.XPATH, '//*[@id="archive"]/a'))
+        # )
+        # menu_item.click()
+        # time.sleep(10)
+
+        #Настройка отчета
+        print('Разворачиваю настройки отчета')
+        menu_item = wait.until(
+            EC.element_to_be_clickable((
+                By.XPATH,
+                '//*[@id="grand_selector"]/div[1]/div/table[2]/tbody/tr/td[3]/a'
+            ))
+        )
+        menu_item.click()
+
+        # Если выгружаем заявки по BUS, то необходимо выбрать производителя
+        if division:
+            try:
+                menu_item = wait.until(
+                    EC.element_to_be_clickable((
+                        By.XPATH,
+                        '//*[@id="interval_type"]'          ### Исправить
+                    ))
+                )
+                # Выбор элемента из выпадающего списка
+                select = Select(menu_item)
+                select.select_by_visible_text(division)
+            except:
+                raise Exception(
+                    'Элемент для выбора производителя не найден. Возможно, данный элемент недоступен для данного аккаунта.'
+                )           
+
+        print('Выставляю тип выгрузки за месяц')
+        menu_item = wait.until(
+            EC.element_to_be_clickable((
+                By.XPATH,
+                '//*[@id="interval_type"]'
+            ))
+        )
+        # Выбор элемента из выпадающего списка
+        select = Select(menu_item)
+        select.select_by_visible_text("МС")
+
+        print('Выставляю год начала периода')
+        menu_item = self.driver.find_element(By.XPATH, '//*[@id="start_year"]')
+        # Выбор элемента из выпадающего списка
+        select = Select(menu_item)
+        select.select_by_value(str(self.start_date.year))
+        time.sleep(1)
+
+        print('Выставляю месяц начала периода')
+        menu_item = self.driver.find_element(By.XPATH, '//*[@id="counter_min"]')
+        # Выбор элемента из выпадающего списка
+        select = Select(menu_item)
+        select.select_by_value(str(self.start_date.month))
+        time.sleep(1)
+
+        print('Выставляю год конца периода')
+        menu_item = self.driver.find_element(By.XPATH, '//*[@id="end_year"]')
+        # Выбор элемента из выпадающего списка
+        select = Select(menu_item)
+        select.select_by_value(str(self.end_date.year))
+        time.sleep(1)
+
+        print('Выставляю месяц конца периода')
+        menu_item = self.driver.find_element(By.XPATH, '//*[@id="counter_max"]')
+        # Выбор элемента из выпадающего списка
+        select = Select(menu_item)
+        select.select_by_value(str(self.end_date.month))
+        time.sleep(1)
+
+        # Перед скачиванием файла экселя очищаем целевую папку
+        file_pattern = os.path.join(self.path, 'Rabochie_listy*')
+        matching_files = glob.glob(file_pattern)
+        if matching_files:
+            for file_path in matching_files:
+                os.remove(file_path)
+                print(f"Удален файл: {file_path}")
+        else:
+            print(f"Файлы, соответствующие шаблону имени 'Rabochie_listy*', не найдены.")
+
+        # Скачивание отчета в эксель
+        print('Нажимаю кнопку')
+        menu_item = self.driver.find_element(
+            By.XPATH,
+            '//*[@id="grand_selector"]/div[1]/div/table[2]/tbody/tr/td[6]/div/a'
+        )
+        self.driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center', inline: 'center'});",
+            menu_item
+        )
+        actions.move_to_element(menu_item).click().perform()
+        self.ts = dt.datetime.now()
+
+        self.file_check('Rabochie_listy')
+
     def file_check(self, data_type):
 
         counter = 0
