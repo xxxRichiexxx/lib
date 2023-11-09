@@ -232,7 +232,10 @@ class CRMExtractor:
         actions = ActionChains(self.driver)
         # Перемещение курсора к указанному элементу
         actions.move_to_element(menu_item).perform()
-        menu_item = self.driver.find_element(By.LINK_TEXT, 'Рабочие листы')
+        # menu_item = self.driver.find_element(By.LINK_TEXT, 'Рабочие лиcты')
+        menu_item = wait.until(
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Рабочие лиcты'))
+        )
         print("Адрес ссылки:", menu_item.get_attribute("href"))
         menu_item.click()
 
