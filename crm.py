@@ -228,7 +228,7 @@ class CRMExtractor:
             EC.element_to_be_clickable((By.LINK_TEXT, 'Процесс продаж'))
         )
         # Выбор нужного отчета
-        print('Выбираю в меню нужный отчет (ОБРАЩЕНИЯ)')
+        print('Выбираю в меню нужный отчет (РАБОЧИЕ ЛИСТЫ)')
         actions = ActionChains(self.driver)
         # Перемещение курсора к указанному элементу
         actions.move_to_element(menu_item).perform()
@@ -273,6 +273,7 @@ class CRMExtractor:
             '//*[@id="modal_customizable"]/div/div/div[3]/button'
         )
         ok_button.click()
+        time.sleep(2)
 
         # Выбираем ВСЕ ОБРАЩЕНИЕ(АРХИВ)
         # print('Выбираем ВСЕ ОБРАЩЕНИЕ(АРХИВ)')
