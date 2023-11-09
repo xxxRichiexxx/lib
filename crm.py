@@ -273,7 +273,7 @@ class CRMExtractor:
             '//*[@id="modal_customizable"]/div/div/div[3]/button'
         )
         ok_button.click()
-        time.sleep(2)
+        time.sleep(4)
 
         # Выбираем ВСЕ ОБРАЩЕНИЕ(АРХИВ)
         # print('Выбираем ВСЕ ОБРАЩЕНИЕ(АРХИВ)')
