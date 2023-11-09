@@ -220,7 +220,7 @@ class CRMExtractor:
 
         self.file_check('Obracsheniya')
 
-def get_worklists(self, division=None):
+    def get_worklists(self, division=None):
         self.auth()
         # Ожидание загрузки страницы и появления элемента
         wait = WebDriverWait(self.driver, 20)
