@@ -273,15 +273,7 @@ class CRMExtractor:
             '//*[@id="modal_customizable"]/div/div/div[3]/button'
         )
         ok_button.click()
-        # time.sleep(10)
-
-        # Выбираем ВСЕ ОБРАЩЕНИЕ(АРХИВ)
-        # print('Выбираем ВСЕ ОБРАЩЕНИЕ(АРХИВ)')
-        # menu_item = wait.until(
-        #     EC.element_to_be_clickable((By.XPATH, '//*[@id="archive"]/a'))
-        # )
-        # menu_item.click()
-        # time.sleep(10)
+        time.sleep(10)
 
         #Настройка отчета
         print('Разворачиваю настройки отчета')
