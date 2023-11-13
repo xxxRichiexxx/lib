@@ -464,6 +464,7 @@ class CRMExtractor:
             ))
         )
         element.click()
+        print('Шестеренку нажал')
 
         # Добавление полей 
         for _ in range(1,25):
