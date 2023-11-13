@@ -449,7 +449,7 @@ class CRMExtractor:
             ))
         )
         actions.move_to_element(menu_item).click().perform()
-        time.sleep(5)
+        time.sleep(10)
 
     
         print('Добавляю поля в выгрузку')
