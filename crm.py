@@ -486,7 +486,7 @@ class CRMExtractor:
             '//*[@id="modal_customizable"]/div/div/div[3]/button'
         )
         ok_button.click()
-        time.sleep(10)        
+        time.sleep(15)        
 
         # Перед скачиванием файла экселя очищаем целевую папку
         file_pattern = os.path.join(self.path, 'Otchet_po_prodazhe*')
