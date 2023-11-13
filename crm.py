@@ -451,7 +451,7 @@ class CRMExtractor:
             ))
         )
         actions.move_to_element(menu_item).click().perform()
-        # time.sleep(10)
+        time.sleep(10)
 
     
         wait = WebDriverWait(self.driver, 120)
