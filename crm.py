@@ -440,9 +440,9 @@ class CRMExtractor:
         # Выбор элемента из выпадающего списка
         select = Select(menu_item)
         select.select_by_value(str(self.end_date.month))
-        # time.sleep(10)
+        time.sleep(2)
 
-        wait = WebDriverWait(self.driver, 5)
+        wait = WebDriverWait(self.driver, 2)
         print('Нажимаю ОБНОВИТЬ ДАННЫЕ')
         menu_item = wait.until(
             EC.element_to_be_clickable((
