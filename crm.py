@@ -454,7 +454,7 @@ class CRMExtractor:
         # time.sleep(10)
 
     
-        wait = WebDriverWait(self.driver, 60)
+        wait = WebDriverWait(self.driver, 120)
         print('Добавляю поля в выгрузку')
         # Ожидание загрузки страницы и появления элемента шестеренки
         element = wait.until(
