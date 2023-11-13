@@ -369,7 +369,7 @@ class CRMExtractor:
     def get_sales(self, division=None):
         self.auth()
         # Ожидание загрузки страницы и появления элемента
-        wait = WebDriverWait(self.driver, 120)
+        wait = WebDriverWait(self.driver, 30)
         menu_item = wait.until(
             EC.element_to_be_clickable((By.LINK_TEXT, 'Отчеты'))
         )
@@ -386,6 +386,7 @@ class CRMExtractor:
         menu_item.click()
 
         # Если выгружаем заявки по BUS, то необходимо выбрать производителя
+        wait = WebDriverWait(self.driver, 20)
         if division:
             try:
                 menu_item = wait.until(
@@ -439,8 +440,9 @@ class CRMExtractor:
         # Выбор элемента из выпадающего списка
         select = Select(menu_item)
         select.select_by_value(str(self.end_date.month))
-        time.sleep(10)
+        # time.sleep(10)
 
+        wait = WebDriverWait(self.driver, 5)
         print('Нажимаю ОБНОВИТЬ ДАННЫЕ')
         menu_item = wait.until(
             EC.element_to_be_clickable((
@@ -449,9 +451,10 @@ class CRMExtractor:
             ))
         )
         actions.move_to_element(menu_item).click().perform()
-        time.sleep(10)
+        # time.sleep(10)
 
     
+        wait = WebDriverWait(self.driver, 60)
         print('Добавляю поля в выгрузку')
         # Ожидание загрузки страницы и появления элемента шестеренки
         element = wait.until(
@@ -465,6 +468,7 @@ class CRMExtractor:
         # Добавление полей 
         for _ in range(1,25):
             try:
+                wait = WebDriverWait(self.driver, 3)
                 field_item = wait.until(
                     EC.element_to_be_clickable((
                         By.XPATH,
@@ -486,7 +490,8 @@ class CRMExtractor:
             '//*[@id="modal_customizable"]/div/div/div[3]/button'
         )
         ok_button.click()
-        time.sleep(15)        
+        # time.sleep(15)        
+
 
         # Перед скачиванием файла экселя очищаем целевую папку
         file_pattern = os.path.join(self.path, 'Otchet_po_prodazhe*')
@@ -500,10 +505,14 @@ class CRMExtractor:
 
         # Скачивание отчета в эксель
         print('Нажимаю кнопку')
-        menu_item = self.driver.find_element(
-            By.XPATH,
-            '//*[@id="grand_selector"]/div[1]/div/table[2]/tbody/tr/td[6]/div/a'
-        )
+        wait = WebDriverWait(self.driver, 30)
+        menu_item = wait.until(
+                    EC.element_to_be_clickable((
+                        By.XPATH,
+                        '//*[@id="grand_selector"]/div[1]/div/table[2]/tbody/tr/td[6]/div/a'
+                    ))
+                )
+
         self.driver.execute_script(
             "arguments[0].scrollIntoView({block: 'center', inline: 'center'});",
             menu_item
