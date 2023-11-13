@@ -442,9 +442,11 @@ class CRMExtractor:
         time.sleep(2)
 
         print('Нажимаю ОБНОВИТЬ ДАННЫЕ')
-        menu_item = self.driver.find_element(
-            By.XPATH,
-            '//*[@id="grand_selector"]/div[1]/div/table[2]/tbody/tr/td[1]/div/div/div[2]/button'
+        menu_item = wait.until(
+            EC.element_to_be_clickable((
+                By.XPATH,
+                '//*[@id="grand_selector"]/div[1]/div/table[2]/tbody/tr/td[1]/div/div/div[2]/button'
+            ))
         )
         menu_item.click()
         time.sleep(1)
