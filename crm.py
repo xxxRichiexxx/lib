@@ -461,7 +461,6 @@ class CRMExtractor:
             ))
         )
         element.click()
-        time.sleep(2)
 
         # Добавление полей 
         for _ in range(1,25):
@@ -478,6 +477,7 @@ class CRMExtractor:
                     '//*[@id="modal_customizable"]/div/div/div[2]/div/form/fieldset/div/div[2]/a[1]'
                 )
                 button.click()
+                print('Поле {_} готово.')
             except:
                 break       
         
