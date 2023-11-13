@@ -439,7 +439,7 @@ class CRMExtractor:
         # Выбор элемента из выпадающего списка
         select = Select(menu_item)
         select.select_by_value(str(self.end_date.month))
-        time.sleep(2)
+        time.sleep(3)
 
         print('Нажимаю ОБНОВИТЬ ДАННЫЕ')
         menu_item = wait.until(
