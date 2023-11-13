@@ -504,7 +504,7 @@ class CRMExtractor:
             print(f"Файлы, соответствующие шаблону имени 'Otchet_po_prodazhe*', не найдены.")
 
         # Скачивание отчета в эксель
-        print('Нажимаю кнопку')
+        print('Нажимаю кнопку.')
         time.sleep(2) 
         wait = WebDriverWait(self.driver, 30)
         menu_item = wait.until(
