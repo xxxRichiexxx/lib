@@ -448,7 +448,7 @@ class CRMExtractor:
                 '//*[@id="grand_selector"]/div[1]/div/table[2]/tbody/tr/td[1]/div/div/div[2]/button'
             ))
         )
-        menu_item.click()
+        actions.move_to_element(menu_item).click().perform()
         time.sleep(1)
 
     
