@@ -37,7 +37,7 @@ class CRMExtractor:
         self.chrome_options.add_argument('--verbose')                            # Уровень журнала. --verbose эквивалентно --log-level=ALL и --silent эквивалентно --log-level=OFF
         self.chrome_options.add_argument("--disable-extensions")                 # позволяет отключить все расширения браузера при запуске
         self.chrome_options.add_argument("--start-maximized")                    # Запуск с развернутым на весь экран окном
-        self.chrome_options.add_argument('--headless')                           # Headless Browser - это веб-браузер без графического пользовательского интерфейса (GUI)
+        # self.chrome_options.add_argument('--headless')                           # Headless Browser - это веб-браузер без графического пользовательского интерфейса (GUI)
         self.chrome_options.add_argument('--disable-gpu')                        
         self.chrome_options.add_argument('--disable-dev-shm-usage')
         self.chrome_options.add_argument('--no-sandbox')
@@ -386,7 +386,7 @@ class CRMExtractor:
         menu_item.click()
 
         # Если выгружаем заявки по BUS, то необходимо выбрать производителя
-        wait = WebDriverWait(self.driver, 20)
+        wait = WebDriverWait(self.driver, 30)
         if division:
             try:
                 menu_item = wait.until(
@@ -413,6 +413,7 @@ class CRMExtractor:
         # Выбор элемента из выпадающего списка
         select = Select(menu_item)
         select.select_by_visible_text("МС")
+        time.sleep(1)
 
         print('Выставляю год начала периода')
         menu_item = self.driver.find_element(By.XPATH, '//*[@id="start_year"]')
@@ -440,9 +441,9 @@ class CRMExtractor:
         # Выбор элемента из выпадающего списка
         select = Select(menu_item)
         select.select_by_value(str(self.end_date.month))
-        time.sleep(2)
+        time.sleep(1)
 
-        wait = WebDriverWait(self.driver, 2)
+        wait = WebDriverWait(self.driver, 10)
         print('Нажимаю ОБНОВИТЬ ДАННЫЕ')
         menu_item = wait.until(
             EC.element_to_be_clickable((
@@ -450,9 +451,9 @@ class CRMExtractor:
                 '//*[@id="grand_selector"]/div[1]/div/table[2]/tbody/tr/td[1]/div/div/div[2]/button'
             ))
         )
-        actions.move_to_element(menu_item).click().perform()
+        menu_item.click()
     
-        wait = WebDriverWait(self.driver, 120)
+        wait = WebDriverWait(self.driver, 60)
         print('Добавляю поля в выгрузку')
         # Ожидание загрузки страницы и появления элемента шестеренки
         element = wait.until(
@@ -489,7 +490,7 @@ class CRMExtractor:
             '//*[@id="modal_customizable"]/div/div/div[3]/button'
         )
         ok_button.click()
-        # time.sleep(15)        
+        time.sleep(1)        
 
 
         # Перед скачиванием файла экселя очищаем целевую папку
@@ -504,6 +505,7 @@ class CRMExtractor:
 
         # Скачивание отчета в эксель
         print('Нажимаю кнопку')
+        time.sleep(2) 
         wait = WebDriverWait(self.driver, 30)
         menu_item = wait.until(
                     EC.element_to_be_clickable((
@@ -516,6 +518,7 @@ class CRMExtractor:
             "arguments[0].scrollIntoView({block: 'center', inline: 'center'});",
             menu_item
         )
+        time.sleep(1) 
         actions.move_to_element(menu_item).click().perform()
         self.ts = dt.datetime.now()
 
