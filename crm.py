@@ -369,7 +369,7 @@ class CRMExtractor:
     def get_sales(self, division=None):
         self.auth()
         # Ожидание загрузки страницы и появления элемента
-        wait = WebDriverWait(self.driver, 20)
+        wait = WebDriverWait(self.driver, 30)
         menu_item = wait.until(
             EC.element_to_be_clickable((By.LINK_TEXT, 'Отчеты'))
         )
