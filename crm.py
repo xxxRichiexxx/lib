@@ -461,6 +461,7 @@ class CRMExtractor:
             ))
         )
         element.click()
+        time.sleep(2)
 
         # Добавление полей 
         for _ in range(1,25):
