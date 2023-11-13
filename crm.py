@@ -439,7 +439,7 @@ class CRMExtractor:
         # Выбор элемента из выпадающего списка
         select = Select(menu_item)
         select.select_by_value(str(self.end_date.month))
-        time.sleep(1)
+        time.sleep(2)
 
         print('Нажимаю ОБНОВИТЬ ДАННЫЕ')
         menu_item = self.driver.find_element(
@@ -449,6 +449,8 @@ class CRMExtractor:
         menu_item.click()
         time.sleep(1)
 
+    
+        print('Добавляю поля в выгрузку')
         # Ожидание загрузки страницы и появления элемента шестеренки
         element = wait.until(
             EC.element_to_be_clickable((
@@ -458,8 +460,7 @@ class CRMExtractor:
         )
         element.click()
 
-        print('Добавляю поля в выгрузку')
-        # Добавление полей в выгрузку
+        # Добавление полей 
         for _ in range(1,25):
             try:
                 field_item = wait.until(
