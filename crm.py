@@ -451,8 +451,6 @@ class CRMExtractor:
             ))
         )
         actions.move_to_element(menu_item).click().perform()
-        time.sleep(10)
-
     
         wait = WebDriverWait(self.driver, 120)
         print('Добавляю поля в выгрузку')
@@ -460,7 +458,7 @@ class CRMExtractor:
         element = wait.until(
             EC.element_to_be_clickable((
                 By.XPATH,
-                '//*[@id="event-grid"]/div[1]/div[1]/button'
+                '//*[@id="event-grid"]/div[1]/div[1]/button/i'
             ))
         )
         element.click()
