@@ -166,6 +166,7 @@ class CRMExtractor:
         # Выбор элемента из выпадающего списка
         select = Select(menu_item)
         select.select_by_visible_text("МС")
+        time.sleep(1)
 
         print('Выставляю год начала периода')
         menu_item = self.driver.find_element(By.XPATH, '//*[@id="start_year"]')
