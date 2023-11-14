@@ -505,8 +505,8 @@ class CRMExtractor:
 
         # Скачивание отчета в эксель
         print('Нажимаю кнопку.')
-        time.sleep(6) 
-        wait = WebDriverWait(self.driver, 30)
+        time.sleep(10) 
+        wait = WebDriverWait(self.driver, 10)
         menu_item = wait.until(
                     EC.element_to_be_clickable((
                         By.XPATH,
