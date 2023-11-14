@@ -127,11 +127,10 @@ class CRMExtractor:
             EC.element_to_be_clickable((By.XPATH, '//*[@id="archive"]/a'))
         )
         menu_item.click()
-        # time.sleep(10)
+        time.sleep(10)
 
         #Настройка отчета
         print('Разворачиваю настройки отчета')
-        wait = WebDriverWait(self.driver, 10)
         menu_item = wait.until(
             EC.element_to_be_clickable((
                 By.XPATH,
