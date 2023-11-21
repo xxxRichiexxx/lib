@@ -3,6 +3,7 @@ import os
 import pyodbc 
 import psycopg2
 import psycopg2.extras
+import pytz
 
 from airflow.hooks.base import BaseHook
 from airflow.models.baseoperator import BaseOperator
@@ -84,7 +85,7 @@ class MSSQLOperator(BaseOperator):
                 FROM {self.data_for_templating['dwh_table_name']};
                 """
             )
-            self.max_dwh_ts = self.dwh_cur.fetchone()[0]
+            self.max_dwh_ts = self.dwh_cur.fetchone()[0].replace(tzinfo=pytz.UTC)
         
             print('Максимальный TS данных в хранилище:', self.max_dwh_ts)
 
