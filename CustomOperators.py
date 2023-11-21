@@ -78,16 +78,19 @@ class MSSQLOperator(BaseOperator):
         if self.ts_field_name:
             self.dwh_cur.execute(
                 f"""
-                SELECT MAX({self.ts_field_name})
+                SELECT MAX({self.ts_field_name}::TIMESTAMP)
                 FROM {self.dwh_table_name};
                 """
             )
-            self.max_dwh_ts = self.dwh_cur.fetchone()
+            self.max_dwh_ts = self.dwh_cur.fetchone()[0]
         
             print('Максимальный TS данных в хранилище:', self.max_dwh_ts)
 
             kwargs['ts_field_name'] = self.ts_field_name
-            kwargs['min_source_ts'] = self.max_dwh_ts
+            if not self.max_dwh_ts:
+                kwargs['min_source_ts'] = self.context['execution_date']
+            else:
+                kwargs['min_source_ts'] = self.max_dwh_ts
             kwargs['max_source_ts'] = (self.context['execution_date'].replace(day=28) + dt.timedelta(days=4)) \
                     .replace(day=1)
 
