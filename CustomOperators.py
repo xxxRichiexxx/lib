@@ -126,7 +126,7 @@ class MSSQLOperator(BaseOperator):
 
         print('Обеспечиваю идемпотентность, открываю sql-скрипт:',  self.dwh_script_path)
 
-        self.data_for_templating['ids'] = ','.join([row[0] for row in self.data])
+        self.data_for_templating['ids'] = ','.join(["'"+str(row[0])+"'" for row in self.data])
 
         with open(
             self.dwh_script_path,
