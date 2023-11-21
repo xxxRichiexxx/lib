@@ -74,6 +74,9 @@ class MSSQLOperator(BaseOperator):
 
         print('Извлечение данных из MSSQL СУБД.')
 
+        kwargs = {}
+        kwargs['source_table_name'] = self.source_table_name
+
         if self.ts_field_name:
             self.dwh_cur.execute(
                 f"""
@@ -85,8 +88,8 @@ class MSSQLOperator(BaseOperator):
         
             print('Максимальный TS данных в хранилище:', self.max_dwh_ts)
 
-        min_source_ts = self.max_dwh_ts
-        max_source_ts = (self.context['execution_date'].replace(day=28) + dt.timedelta(days=4)) \
+            kwargs{'min_source_ts'} = self.max_dwh_ts
+            kwargs{'max_source_ts'} = (self.context['execution_date'].replace(day=28) + dt.timedelta(days=4)) \
                     .replace(day=1)
 
         print('Открываю sql-скрипт:', self.source_script_path)
@@ -96,11 +99,7 @@ class MSSQLOperator(BaseOperator):
             'r',
             encoding="utf-8",
         ) as f:
-            query = f.read().format(
-                min_source_ts=min_source_ts,
-                max_source_ts=max_source_ts,
-                source_table_name=self.source_table_name,
-            )
+            query = f.read().format(**kwargs)
         print(query)
 
         print('Выполняю запрос к источнику')
