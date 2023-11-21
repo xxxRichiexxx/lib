@@ -65,9 +65,12 @@ class MSSQLOperator(BaseOperator):
         with dwh_connection, source_connection:
             with self.dwh_cur, self.source_cur:
                 self.extract()
-                self.transform()
-                self.load()
-                self.check()
+                if self.data:
+                    self.transform()
+                    self.load()
+                    self.check()
+                else:
+                    print('Нет данных для загрузки.')
 
 
     def extract(self):
