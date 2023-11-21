@@ -61,7 +61,7 @@ class MSSQLOperator(BaseOperator):
             + ';PWD=' + self.source_con.password
         )        
 
-        self.source_cur = source_connection.sursor()
+        self.source_cur = source_connection.cursor()
 
         with dwh_connection, source_connection:
             with self.dwh_cur, self.source_cur:
