@@ -1,14 +1,12 @@
-from airflow.models.baseoperator import BaseOperator
-from airflow.utils.decorators import apply_defaults
-
-from datetime import datetime as dt
-
-import pyodbc 
-from airflow.hooks.base import BaseHook
+import datetime as dt
 import os
-
+import pyodbc 
 import psycopg2
 import psycopg2.extras
+
+from airflow.hooks.base import BaseHook
+from airflow.models.baseoperator import BaseOperator
+from airflow.utils.decorators import apply_defaults
 
 
 class MSSQLOperator(BaseOperator):
@@ -88,6 +86,7 @@ class MSSQLOperator(BaseOperator):
         
             print('Максимальный TS данных в хранилище:', self.max_dwh_ts)
 
+            kwargs['ts_field_name'] = self.ts_field_name
             kwargs['min_source_ts'] = self.max_dwh_ts
             kwargs['max_source_ts'] = (self.context['execution_date'].replace(day=28) + dt.timedelta(days=4)) \
                     .replace(day=1)
