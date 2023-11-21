@@ -25,13 +25,14 @@ class MSSQLOperator(BaseOperator):
         **kwargs
     ):
         super().__init__(*args, **kwargs)
+        self.data_for_templating = {}
         self.source_con = BaseHook.get_connection(source_connection_id)
         self.source_script_path = source_script_path
         self.dwh_con = BaseHook.get_connection(dwh_connection_id)
         self.dwh_script_path = dwh_script_path
-        self.source_table_name = source_table_name
-        self.dwh_table_name = dwh_table_name
-        self.ts_field_name = ts_field_name
+        self.data_for_templating['source_table_name'] = source_table_name
+        self.data_for_templating['dwh_table_name'] = dwh_table_name
+        self.data_for_templating['ts_field_name'] = ts_field_name
 
     def execute(self, context):
 
@@ -73,29 +74,26 @@ class MSSQLOperator(BaseOperator):
 
         print('Извлечение данных из MSSQL СУБД.')
 
-        kwargs = {}
-        kwargs['source_table_name'] = self.source_table_name
-
-        if self.ts_field_name:
+        if self.data_for_templating['ts_field_name']:
             self.dwh_cur.execute(
                 f"""
-                SELECT MAX({self.ts_field_name}::TIMESTAMP)
-                FROM {self.dwh_table_name};
+                SELECT MAX({self.data_for_templating['ts_field_name']}::TIMESTAMP)
+                FROM {self.data_for_templating['dwh_table_name']};
                 """
             )
             self.max_dwh_ts = self.dwh_cur.fetchone()[0]
         
             print('Максимальный TS данных в хранилище:', self.max_dwh_ts)
 
-            kwargs['ts_field_name'] = self.ts_field_name
             if not self.max_dwh_ts:
-                kwargs['min_source_ts'] = self.context['execution_date'] - dt.timedelta(days=1)
+                self.data_for_templating['min_source_ts'] = self.context['execution_date'] - dt.timedelta(days=1)
             else:
-                kwargs['min_source_ts'] = self.max_dwh_ts
-            kwargs['max_source_ts'] = (self.context['execution_date'].replace(day=28) + dt.timedelta(days=4)) \
+                self.data_for_templating['min_source_ts'] = self.max_dwh_ts
+
+            self.data_for_templating['max_source_ts'] = (self.context['execution_date'].replace(day=28) + dt.timedelta(days=4)) \
                     .replace(day=1)
                     
-            if kwargs['min_source_ts'] > kwargs['min_source_ts']:
+            if self.data_for_templating['min_source_ts'] > self.data_for_templating['max_source_ts']:
                 raise Exception(
                     ('min_source_ts > max_source_ts! Возможно, это связано с тем,'
                      'что вы пытаетесь перезалить данные в непустую таблицу хранилища.'
@@ -109,7 +107,7 @@ class MSSQLOperator(BaseOperator):
             'r',
             encoding="utf-8",
         ) as f:
-            query = f.read().format(**kwargs)
+            query = f.read().format(**self.data_for_templating)
         print(query)
 
         print('Выполняю запрос к источнику')
@@ -125,7 +123,7 @@ class MSSQLOperator(BaseOperator):
 
         print('Обеспечиваю идемпотентность, открываю sql-скрипт:',  self.dwh_script_path)
 
-        ids = ','.join([row[0] for row in self.data])
+        self.data_for_templating['ids'] = ','.join([row[0] for row in self.data])
 
         with open(
             self.dwh_script_path,
@@ -133,28 +131,27 @@ class MSSQLOperator(BaseOperator):
             encoding="utf-8",
         ) as f:
             query = f.read().format(
-                ids=ids,
-                dwh_table_name=self.dwh_table_name,
+                **self.data_for_templating,
             )
         print(query)
 
         print('Выполняю запрос к dwh')
         self.dwh_cur.execute(query)                
 
-        insert_stmt = f"INSERT INTO {self.dwh_table_name} VALUES %s"
+        insert_stmt = f"INSERT INTO {self.data_for_templating['dwh_table_name']} VALUES %s"
         psycopg2.extras.execute_values(self.dwh_cur, insert_stmt, self.data)
 
     def check(self):
 
         initial_rows_number = len(self.data)
 
-        if self.ts_field_name:
+        if self.data_for_templating['ts_field_name']:
 
             self.dwh_cur.execute(
                 f"""
                 SELECT COUNT(*)
-                FROM {self.dwh_table_name}
-                WHERE {self.ts_field_name} > '{self.max_dwh_ts}';
+                FROM {self.data_for_templating['dwh_table_name']}
+                WHERE {self.data_for_templating['ts_field_name']} > '{self.data_for_templating['min_source_ts']}';
                 """
             )
 
@@ -163,7 +160,7 @@ class MSSQLOperator(BaseOperator):
             self.dwh_cur.execute(
                 f"""
                 SELECT COUNT(*)
-                FROM {self.dwh_table_name};
+                FROM {self.data_for_templating['dwh_table_name']};
                 """
             )
 
