@@ -148,7 +148,8 @@ class MSSQLOperator(BaseOperator):
                 f"""
                 SELECT COUNT(*)
                 FROM {self.data_for_templating['dwh_table_name']}
-                WHERE {self.data_for_templating['ts_field_name']} > '{self.data_for_templating['min_source_ts']}';
+                WHERE {self.data_for_templating['ts_field_name']} > '{self.data_for_templating['min_source_ts']}'
+                    AND {self.data_for_templating['ts_field_name']} < '{self.data_for_templating['max_source_ts']}';
                 """
             )
 
