@@ -88,8 +88,8 @@ class MSSQLOperator(BaseOperator):
         
             print('Максимальный TS данных в хранилище:', self.max_dwh_ts)
 
-            kwargs{'min_source_ts'} = self.max_dwh_ts
-            kwargs{'max_source_ts'} = (self.context['execution_date'].replace(day=28) + dt.timedelta(days=4)) \
+            kwargs['min_source_ts'] = self.max_dwh_ts
+            kwargs['max_source_ts'] = (self.context['execution_date'].replace(day=28) + dt.timedelta(days=4)) \
                     .replace(day=1)
 
         print('Открываю sql-скрипт:', self.source_script_path)
