@@ -89,20 +89,13 @@ class MSSQLOperator(BaseOperator):
         
             print('Максимальный TS данных в хранилище:', self.max_dwh_ts)
 
-            if not self.max_dwh_ts:
+            self.data_for_templating['max_source_ts'] = (self.context['execution_date'].replace(day=28) + dt.timedelta(days=4)) \
+                    .replace(day=1)
+
+            if not self.max_dwh_ts or self.max_dwh_ts > self.data_for_templating['max_source_ts']:
                 self.data_for_templating['min_source_ts'] = self.context['execution_date'] - dt.timedelta(days=1)
             else:
                 self.data_for_templating['min_source_ts'] = self.max_dwh_ts
-
-            self.data_for_templating['max_source_ts'] = (self.context['execution_date'].replace(day=28) + dt.timedelta(days=4)) \
-                    .replace(day=1)
-                    
-            if self.data_for_templating['min_source_ts'] > self.data_for_templating['max_source_ts']:
-                raise Exception(
-                    ('min_source_ts > max_source_ts! Возможно, это связано с тем,'
-                     'что вы пытаетесь перезалить данные в непустую таблицу хранилища.'
-                     'Нужно очистить таблицу в хранилище или корректно указать start_date для DAGа.')
-                )
 
         print('Открываю sql-скрипт:', self.source_script_path)
 
