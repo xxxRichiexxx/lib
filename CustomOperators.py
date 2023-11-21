@@ -42,7 +42,7 @@ class MSSQLOperator(BaseOperator):
         dwh_connection = psycopg2.connect(
             host=self.dwh_con.host,
             port=self.dwh_con.port,
-            database=self.dwh_con.scheme,
+            database=self.dwh_con.schema,
             user=self.dwh_con.login,
             password=self.dwh_con.password,
         )
