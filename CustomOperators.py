@@ -105,7 +105,7 @@ class MSSQLOperator(BaseOperator):
             encoding="utf-8",
         ) as f:
             query = f.read().format(**self.data_for_templating)
-        print(query)
+        print(query[:100])
 
         print('Выполняю запрос к источнику')
         self.source_cur.execute(query)
@@ -130,7 +130,7 @@ class MSSQLOperator(BaseOperator):
             query = f.read().format(
                 **self.data_for_templating,
             )
-        print(query)
+        print(query[:100])
 
         print('Выполняю запрос к dwh')
         self.dwh_cur.execute(query)                
