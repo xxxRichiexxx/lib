@@ -66,6 +66,7 @@ class MSSQLOperator(BaseOperator):
                 self.extract()
                 self.transform()
                 self.load()
+                self.check()
 
 
     def extract(self):
@@ -88,11 +89,18 @@ class MSSQLOperator(BaseOperator):
 
             kwargs['ts_field_name'] = self.ts_field_name
             if not self.max_dwh_ts:
-                kwargs['min_source_ts'] = self.context['execution_date']
+                kwargs['min_source_ts'] = self.context['execution_date'] - dt.timedelta(days=1)
             else:
                 kwargs['min_source_ts'] = self.max_dwh_ts
             kwargs['max_source_ts'] = (self.context['execution_date'].replace(day=28) + dt.timedelta(days=4)) \
                     .replace(day=1)
+                    
+            if kwargs['min_source_ts'] > kwargs['min_source_ts']:
+                raise Exception(
+                    ('min_source_ts > max_source_ts! Возможно, это связано с тем,'
+                     'что вы пытаетесь перезалить данные в непустую таблицу хранилища.'
+                     'Нужно очистить таблицу в хранилище или корректно указать start_date для DAGа.')
+                )
 
         print('Открываю sql-скрипт:', self.source_script_path)
 
@@ -135,3 +143,37 @@ class MSSQLOperator(BaseOperator):
 
         insert_stmt = f"INSERT INTO {self.dwh_table_name} VALUES %s"
         psycopg2.extras.execute_values(self.dwh_cur, insert_stmt, self.data)
+
+    def check(self):
+
+        initial_rows_number = len(self.data)
+
+        if self.ts_field_name:
+
+            self.dwh_cur.execute(
+                f"""
+                SELECT COUNT(*)
+                FROM {self.dwh_table_name}
+                WHERE {self.ts_field_name} > '{self.max_dwh_ts}';
+                """
+            )
+
+        else:
+
+            self.dwh_cur.execute(
+                f"""
+                SELECT COUNT(*)
+                FROM {self.dwh_table_name};
+                """
+            )
+
+        total_rows_number = self.dwh_cur.fetchone()[0] 
+
+        if total_rows_number != initial_rows_number:
+            raise Exception(
+                'Загруженное число строк не совпадает с полученным:',
+                total_rows_number,
+                initial_rows_number,
+            )
+        else:
+            print('Загружено', initial_rows_number, 'строк.')       
