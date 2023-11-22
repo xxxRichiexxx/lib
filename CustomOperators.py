@@ -12,6 +12,46 @@ from airflow.utils.decorators import apply_defaults
 
 class MSSQLOperator(BaseOperator):
 
+    """
+    Данный класс извлекает данные из СУБД MSSQL и записывает их 
+    в СУБД Greenplum.
+
+    Атрибуты:
+    ----------
+    source_connection_id: str
+        Идентификатор подключения Airflow для источника MSSQL
+    source_script_path: str
+        Путь до файла *.sql, который содержит скрипт извлечения
+        данных из источника.
+        Данный скрипт может быть шаблонизирован с помощью 
+        следующих переменных: 
+
+            source_table_name - название таблицы в источнике
+            ts_field_name - название поля с датой изменения (ts)
+            min_source_ts - минимальное значение ts для батча
+            max_source_ts - максимальное значение ts для батча
+
+    dwh_connection_id: str
+        Идентификатор подключения Airflow для хранилища Greenplum
+    dwh_script_path: str
+        Путь до файла *.sql, который содержит скрипт удаления 
+        (обеспечение идемпотентности) данных в источнике
+        Данный скрипт может быть шаблонизирован с помощью 
+        следующих переменных:
+            dwh_table_name - название таблицы в dwh
+            ts_field_name - название поля с датой изменения (ts)
+            min_source_ts - минимальное значение ts для батча
+            max_source_ts - максимальное значение ts для батча
+            ids - перечень идентификаторов записей в батче
+
+    source_table_name: str
+        название таблицы в источнике
+    dwh_table_name: str
+        название таблицы в dwh
+    ts_field_name: str
+        название поля с датой изменения (ts)
+    """
+
     @apply_defaults
     def __init__(
         self,
@@ -36,6 +76,9 @@ class MSSQLOperator(BaseOperator):
         self.data_for_templating['ts_field_name'] = ts_field_name
 
     def execute(self, context):
+        """
+        Данный метод запускается автоматически при использовании оператора в Airflow.
+        """
 
         self.context = context
 
@@ -75,7 +118,9 @@ class MSSQLOperator(BaseOperator):
 
 
     def extract(self):
-
+        """
+        Извлекает данные из MSSQL.
+        """
         print('Извлечение данных из MSSQL СУБД.')
 
         if self.data_for_templating['ts_field_name']:
@@ -113,10 +158,16 @@ class MSSQLOperator(BaseOperator):
         self.data = self.source_cur.fetchall()
 
     def transform(self):
+        """
+        Трансформирует данные.
+        Должен быть переопределен, если необходима трансформация данных перед записью в DWH.
+        """
         pass
 
     def load(self):
-
+        """
+        Запись данных в DWH.
+        """
         print('Загрузка данных в хранилище.')
 
         print(
@@ -143,6 +194,9 @@ class MSSQLOperator(BaseOperator):
         psycopg2.extras.execute_values(self.dwh_cur, insert_stmt, self.data)
 
     def check(self):
+        """
+        Проверка результата записи.
+        """
 
         initial_rows_number = len(self.data)
 
