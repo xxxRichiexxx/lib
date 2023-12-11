@@ -137,8 +137,8 @@ class MSSQLOperator(BaseOperator):
             self.data_for_templating['max_source_ts'] = (self.context['execution_date'].replace(day=28)
                                                          + dt.timedelta(days=4)).replace(day=1)
 
-            if (not self.max_dwh_ts or self.max_dwh_ts.replace(tzinfo=pytz.UTC)
-                > self.data_for_templating['max_source_ts']):
+            if (not self.max_dwh_ts 
+                or self.max_dwh_ts.replace(tzinfo=pytz.UTC) > self.data_for_templating['max_source_ts']):
                 self.data_for_templating['min_source_ts'] = self.context['execution_date'] - dt.timedelta(days=1)
             else:
                 self.data_for_templating['min_source_ts'] = self.max_dwh_ts

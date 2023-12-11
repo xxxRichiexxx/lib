@@ -526,6 +526,124 @@ class CRMExtractor:
 
         self.file_check('Otchet_po_prodazhe')
 
+    def get_stat(self, division=None):
+        self.auth()
+        # Ожидание загрузки страницы и появления элемента
+        wait = WebDriverWait(self.driver, 30)
+        menu_item = wait.until(
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Отчеты'))
+        )
+        # Выбор нужного отчета
+        print('Выбираю в меню нужный отчет (Дисцмплина работ в CRM)')
+        actions = ActionChains(self.driver)
+        # Перемещение курсора к указанному элементу
+        actions.move_to_element(menu_item).perform()
+        # menu_item = self.driver.find_element(By.LINK_TEXT, 'Рабочие лиcты')
+        menu_item = wait.until(
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Дисциплина работ в CRM'))
+        )
+        print("Адрес ссылки:", menu_item.get_attribute("href"))
+        menu_item.click()
+
+        # Ждем кнопку "развернуть"
+        wait = WebDriverWait(self.driver, 30)
+        menu_item = wait.until(
+            EC.element_to_be_clickable((
+                By.XPATH,
+                '//*[@id="grand_selector"]/div[1]/div/table[2]/tbody/tr/td[3]/a',
+            ))
+        )
+        time.sleep(2)
+        menu_item.click()   
+
+        # Если выгружаем заявки по BUS, то необходимо выбрать производителя     
+        if division:
+            try:
+                menu_item = wait.until(
+                    EC.element_to_be_clickable((
+                        By.XPATH,
+                        '//*[@id="interval_type"]'          ### Исправить
+                    ))
+                )
+                # Выбор элемента из выпадающего списка
+                select = Select(menu_item)
+                select.select_by_visible_text(division)
+            except:
+                raise Exception(
+                    'Элемент для выбора производителя не найден. Возможно, данный элемент недоступен для данного аккаунта.'
+                )           
+
+        print('Выставляю тип выгрузки за месяц')
+        menu_item = wait.until(
+            EC.element_to_be_clickable((
+                By.XPATH,
+                '//*[@id="interval_type"]'
+            ))
+        )
+        # Выбор элемента из выпадающего списка
+        select = Select(menu_item)
+        select.select_by_visible_text("МС")
+        time.sleep(1)
+
+        print('Выставляю год начала периода')
+        menu_item = self.driver.find_element(By.XPATH, '//*[@id="start_year"]')
+        # Выбор элемента из выпадающего списка
+        select = Select(menu_item)
+        select.select_by_value(str(self.start_date.year))
+        time.sleep(1)
+
+        print('Выставляю месяц начала периода')
+        menu_item = self.driver.find_element(By.XPATH, '//*[@id="counter_min"]')
+        # Выбор элемента из выпадающего списка
+        select = Select(menu_item)
+        select.select_by_value(str(self.start_date.month))
+        time.sleep(1)
+
+        print('Выставляю год конца периода')
+        menu_item = self.driver.find_element(By.XPATH, '//*[@id="end_year"]')
+        # Выбор элемента из выпадающего списка
+        select = Select(menu_item)
+        select.select_by_value(str(self.end_date.year))
+        time.sleep(1)
+
+        print('Выставляю месяц конца периода')
+        menu_item = self.driver.find_element(By.XPATH, '//*[@id="counter_max"]')
+        # Выбор элемента из выпадающего списка
+        select = Select(menu_item)
+        select.select_by_value(str(self.end_date.month))
+        time.sleep(1)
+
+        # Перед скачиванием файла экселя очищаем целевую папку
+        file_pattern = os.path.join(self.path, 'Disciplina_rabot_v_CRM*')
+        matching_files = glob.glob(file_pattern)
+        if matching_files:
+            for file_path in matching_files:
+                os.remove(file_path)
+                print(f"Удален файл: {file_path}")
+        else:
+            print(f"Файлы, соответствующие шаблону имени 'Disciplina_rabot_v_CRM*', не найдены.")
+
+        # Скачивание отчета в эксель
+        print('Нажимаю кнопку.')
+        time.sleep(3) 
+        wait = WebDriverWait(self.driver, 10)
+        menu_item = wait.until(
+                    EC.element_to_be_clickable((
+                        By.XPATH,
+                        '//*[@id="grand_selector"]/div[1]/div/table[2]/tbody/tr/td[6]/div/a'
+                    ))
+                )
+
+        self.driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center', inline: 'center'});",
+            menu_item
+        )
+        time.sleep(1) 
+        actions.move_to_element(menu_item).click().perform()
+        self.ts = dt.datetime.now()
+
+        self.file_check('Disciplina_rabot_v_CRM')        
+
     def file_check(self, data_type):
 
         counter = 0
