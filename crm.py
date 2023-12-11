@@ -526,7 +526,7 @@ class CRMExtractor:
 
         self.file_check('Otchet_po_prodazhe')
 
-    def get_stat(self, division=None):
+    def get_stats(self, division=None):
         self.auth()
         # Ожидание загрузки страницы и появления элемента
         wait = WebDriverWait(self.driver, 30)
