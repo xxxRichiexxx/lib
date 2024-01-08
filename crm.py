@@ -647,7 +647,7 @@ class CRMExtractor:
     def file_check(self, data_type):
 
         counter = 0
-        file_pattern = os.path.join(self.path, fr'{data_type}_{self.ts.year}_{self.ts.month}_*.xlsx')
+        file_pattern = os.path.join(self.path, fr'{data_type}_*.xlsx')
         print('Ищу следующий файл:', file_pattern)
 
         while True:
