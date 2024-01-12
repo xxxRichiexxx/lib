@@ -327,13 +327,13 @@ class MDAuditOperator(BaseOperator):
         ids = ','.join(str(ids))
 
         print('Обеспечиваем идемпотентность.')
-        self.cursor.execute(
+        self.dwh_cur.execute(
             f"""
             DELETE FROM {self.table_name} WHERE id IN ({ids});
             """
         )
         if last_modified_field:
-            self.cursor.execute(
+            self.dwh_cur.execute(
                 f"""
                 DELETE FROM {self.table_name} WHERE id NOT IN ({ids})
                     AND last_modified_at >= {self.start_date}
