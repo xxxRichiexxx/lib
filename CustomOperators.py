@@ -324,7 +324,7 @@ class MDAuditOperator(BaseOperator):
             )
             last_modified_field = True if item.get('last_modified_at', None) != None else False
 
-        ids = ','.join(ids)
+        ids = ','.join(str(ids))
 
         print('Обеспечиваем идемпотентность.')
         self.cursor.execute(
