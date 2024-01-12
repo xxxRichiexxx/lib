@@ -350,36 +350,3 @@ class MDAuditOperator(BaseOperator):
         Проверка результата записи.
         """
         pass 
-
-        # initial_rows_number = len(self.data)
-
-        # if self.data_for_templating['ts_field_name']:
-
-        #     self.dwh_cur.execute(
-        #         f"""
-        #         SELECT COUNT(*)
-        #         FROM {self.data_for_templating['dwh_table_name']}
-        #         WHERE {self.data_for_templating['ts_field_name']} > '{self.data_for_templating['min_source_ts']}'
-        #             AND {self.data_for_templating['ts_field_name']} < '{self.data_for_templating['max_source_ts']}';
-        #         """
-        #     )
-
-        # else:
-
-        #     self.dwh_cur.execute(
-        #         f"""
-        #         SELECT COUNT(*)
-        #         FROM {self.data_for_templating['dwh_table_name']};
-        #         """
-        #     )
-
-        # total_rows_number = self.dwh_cur.fetchone()[0] 
-
-        # if total_rows_number != initial_rows_number:
-        #     raise Exception(
-        #         'Загруженное число строк не совпадает с полученным:',
-        #         total_rows_number,
-        #         initial_rows_number,
-        #     )
-        # else:
-        #     print('Загружено', initial_rows_number, 'строк.')
