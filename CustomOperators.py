@@ -336,8 +336,8 @@ class MDAuditOperator(BaseOperator):
             self.dwh_cur.execute(
                 f"""
                 DELETE FROM {self.table_name} WHERE id NOT IN ({ids})
-                    AND last_modified_at >= {self.start_date}
-                    AND last_modified_at < {self.end_date};
+                    AND last_modified_at >= '{self.start_date}'
+                    AND last_modified_at < '{self.end_date}';
                 """
             )                      
 
