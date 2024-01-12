@@ -248,7 +248,7 @@ class MDAuditOperator(BaseOperator):
     ):
         super().__init__(*args, **kwargs)
         self.dwh_con = BaseHook.get_connection(dwh_connection_id)
-        table_name = table_name
+        self.table_name = table_name
         self.source_con = BaseHook.get_connection(source_connection_id)
         self.url = self.source_con.host + endpoint
         self.headers = json.loads(self.source_con.extra)
