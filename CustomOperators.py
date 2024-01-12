@@ -318,13 +318,13 @@ class MDAuditOperator(BaseOperator):
         for_upsert_data = []
 
         for item in self.data:
-            ids.append(item['id'])
+            ids.append(str(item['id']))
             for_upsert_data.append(
                 (item['id'], item.get('last_modified_at', None), json.dumps(item, ensure_ascii=False))
             )
             last_modified_field = True if item.get('last_modified_at', None) != None else False
 
-        ids = ','.join(str(ids))
+        ids = ','.join(ids)
 
         print('Обеспечиваем идемпотентность.')
         self.dwh_cur.execute(
